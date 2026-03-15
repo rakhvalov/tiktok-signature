@@ -27,14 +27,14 @@ describe("tiktok-signature", () => {
     });
 
     test("SDK file exists", () => {
-      const sdkPath = path.join(ROOT_DIR, "javascript", "webmssdk_5.1.3.js");
+      const sdkPath = path.join(ROOT_DIR, "javascript", "webmssdk_5.2.0.js");
       expect(fs.existsSync(sdkPath)).toBe(true);
     });
   });
 
   describe("SDK content", () => {
     test("SDK contains signature generation functions", () => {
-      const sdkPath = path.join(ROOT_DIR, "javascript", "webmssdk_5.1.3.js");
+      const sdkPath = path.join(ROOT_DIR, "javascript", "webmssdk_5.2.0.js");
       const content = fs.readFileSync(sdkPath, "utf-8");
 
       // SDK should contain key signature-related code

@@ -213,3 +213,6 @@ docker-compose.override.yml
 
 # Claude Code
 .claude/
+
+# chrome-profile
+.chrome-profile

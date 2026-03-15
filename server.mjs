@@ -50,7 +50,7 @@ const PROXY_USER = process.env.PROXY_USER || "";
 const PROXY_PASS = process.env.PROXY_PASS || "";
 
 // Local SDK path - the SDK is used to generate valid signatures
-const SDK_PATH = path.join(__dirname, "javascript", "webmssdk_5.1.3.js");
+const SDK_PATH = path.join(__dirname, "javascript", "webmssdk_5.2.0.js");
 let localSdkContent = null;
 
 // Try to load local SDK
