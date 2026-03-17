@@ -741,7 +741,8 @@ async function handleRequest(req, res) {
     }
 
     // Generate signature (RECOMMENDED - scalable)
-    if (url.pathname === "/signature" && req.method === "POST") {
+    // Also handles /webcast/sign_url for gotiktoklive compatibility
+    if ((url.pathname === "/signature" || url.pathname === "/webcast/sign_url") && req.method === "POST") {
       let body = "";
       for await (const chunk of req) {
         body += chunk;
@@ -802,6 +803,44 @@ async function handleRequest(req, res) {
           },
         }),
       );
+      return;
+    }
+
+    // Proxy endpoint compatible with gotiktoklive library (GET /webcast/fetch/?url=...)
+    // Signs the URL and fetches it, returning raw TikTok response + X-Set-TT-Cookie header.
+    if (url.pathname === "/webcast/fetch/" && req.method === "GET") {
+      const targetUrl = url.searchParams.get("url");
+      if (!targetUrl) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "url parameter required" }));
+        return;
+      }
+
+      const signed = await generateSignedUrl(targetUrl);
+      const cookieHeader = (signed.cookies || [])
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+
+      const tiktokRes = await fetch(signed.signedUrl, {
+        headers: {
+          "User-Agent": signed.userAgent,
+          Accept: "text/html,application/json,application/protobuf",
+          Referer: "https://www.tiktok.com/",
+          Origin: "https://www.tiktok.com",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate",
+          Cookie: cookieHeader,
+        },
+      });
+
+      const ttCookie = tiktokRes.headers.get("X-Set-TT-Cookie") || "";
+      const buf = Buffer.from(await tiktokRes.arrayBuffer());
+
+      res.writeHead(tiktokRes.status, {
+        "Content-Type": "application/octet-stream",
+        "X-Set-TT-Cookie": ttCookie,
+      });
+      res.end(buf);
       return;
     }
 
